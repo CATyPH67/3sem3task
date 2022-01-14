@@ -4,7 +4,6 @@ public class Boundry {
     final int xMin, yMin, xMax, yMax;
 
     public Boundry(int xMin, int yMin, int xMax, int yMax) {
-        super();
         this.xMin = xMin;
         this.yMin = yMin;
         this.xMax = xMax;
@@ -28,7 +27,7 @@ public class Boundry {
     }
 
     public boolean inRange(int x, int y) {
-        return (x >= this.getXMin() && x <= this.getXMax()
-                && y >= this.getYMin() && y <= this.getYMax());
+        return (x >= xMin && x <= xMax
+                && y >= yMin && y <= yMax);
     }
 }
