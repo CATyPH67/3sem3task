@@ -2,7 +2,7 @@ package com.company;
 
 public class QuadTree {
     private int level;
-    private Point point = null;
+    private QuadTreePoint point = null;
     private QuadTree parent;
     private QuadTree northWest = null;
     private QuadTree northEast = null;
@@ -10,7 +10,7 @@ public class QuadTree {
     private QuadTree southEast = null;
     private Boundry boundry;
 
-    QuadTree(int level, Boundry boundry, QuadTree parent) {
+    public QuadTree(int level, Boundry boundry, QuadTree parent) {
         this.level = level;
         this.boundry = boundry;
         this.parent = parent;
@@ -24,11 +24,11 @@ public class QuadTree {
         this.level = level;
     }
 
-    public Point getPoint() {
+    public QuadTreePoint getPoint() {
         return point;
     }
 
-    public void setPoint(Point point) {
+    public void setPoint(QuadTreePoint point) {
         this.point = point;
     }
 
@@ -100,13 +100,13 @@ public class QuadTree {
             int y = point.getY();
             int value = point.getValue();
             if (this.northWest.boundry.inRange(x, y))
-                this.northWest.point = new Point(x, y, value);
+                this.northWest.point = new QuadTreePoint(x, y, value);
             else if (this.northEast.boundry.inRange(x, y))
-                this.northEast.point = new Point(x, y, value);
+                this.northEast.point = new QuadTreePoint(x, y, value);
             else if (this.southWest.boundry.inRange(x, y))
-                this.southWest.point = new Point(x, y, value);
+                this.southWest.point = new QuadTreePoint(x, y, value);
             else if (this.southEast.boundry.inRange(x, y))
-                this.southEast.point = new Point(x, y, value);
+                this.southEast.point = new QuadTreePoint(x, y, value);
 
             point = null;
         }
@@ -117,8 +117,14 @@ public class QuadTree {
             return;
         }
 
+        if (this.point != null) {
+            if ((this.point.getX() == x) && (this.point.getY() == y)) {
+                return;
+            }
+        }
+
         if (northWest == null) {
-            Point point = new Point(x, y, value);
+            QuadTreePoint point = new QuadTreePoint(x, y, value);
             if (this.point == null) {
                 this.point = point;
                 return;
@@ -137,12 +143,12 @@ public class QuadTree {
             this.southEast.insert(x, y, value);
     }
 
-    public Point findPoint(int x, int y) {
+    public QuadTreePoint findPoint(int x, int y) {
         if (!this.boundry.inRange(x, y)) {
             return null;
         }
         QuadTree quadrantForPoint = findQuadrantForPoint(this, x, y);
-        Point point = quadrantForPoint.point;
+        QuadTreePoint point = quadrantForPoint.point;
         if (point == null) {
             return null;
         } else {
@@ -177,14 +183,19 @@ public class QuadTree {
         QuadTree quadrantForPoint = findQuadrantForPoint(this, x, y);
         if (quadrantForPoint.point != null) {
             quadrantForPoint.point = null;
-            balance(quadrantForPoint.parent);
+            boolean wasBalanced = true;
+            while ((wasBalanced) && (quadrantForPoint.parent != null)) {
+                QuadTree parent = quadrantForPoint.parent;
+                wasBalanced = balance(parent);
+                quadrantForPoint = parent;
+            }
         }
     }
 
-    private void balance(QuadTree tree) {
+    private boolean balance(QuadTree tree) {
         if (tree.northWest != null) {
             int countOfEmptyQuadrant = 0;
-            Point point = null;
+            QuadTreePoint point = null;
 
             if (isQuadrantEmpty(tree.northWest)) {
                 countOfEmptyQuadrant++;
@@ -215,6 +226,7 @@ public class QuadTree {
                 tree.northEast = null;
                 tree.southWest = null;
                 tree.southEast = null;
+                return true;
             }
 
             if ((countOfEmptyQuadrant == 3) && (point != null)) {
@@ -223,12 +235,15 @@ public class QuadTree {
                 tree.southWest = null;
                 tree.southEast = null;
                 tree.point = point;
+                return true;
             }
+            return false;
         }
+        return false;
     }
 
     private boolean isQuadrantEmpty(QuadTree tree) {
-        Point point = tree.point;
+        QuadTreePoint point = tree.point;
         QuadTree northWest = tree.northWest;
         return (point == null) && (northWest == null);
     }

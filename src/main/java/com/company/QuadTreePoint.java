@@ -1,11 +1,11 @@
 package com.company;
 
-public class Point {
+public class QuadTreePoint {
     private int x;
     private int y;
     private int value;
 
-    public Point(int x, int y, int value) {
+    public QuadTreePoint(int x, int y, int value) {
         this.x = x;
         this.y = y;
         this.value = value;
